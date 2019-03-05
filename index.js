@@ -25,7 +25,9 @@ app.use(offerRoutes);
 app.use(userRoutes);
 
 
-
+app.get("/", (req, res) => {
+    res.json({ message: "Homepage" });
+})
 
 app.listen(process.env.PORT || 3001, () => {
     console.log("Server started");
