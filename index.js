@@ -9,8 +9,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-mongoose.connect(
-    process.env.MONGODB_URI,
+mongoose.connect(process.env.MONGODB_URI ||
+    "mongodb://localhost/leboncoin",
     { useNewUrlParser: true }
 );
 
@@ -27,7 +27,7 @@ app.use(userRoutes);
 
 
 
-app.listen(process.env.PORT || 3000, () => {
+app.listen(process.env.PORT || 3001, () => {
     console.log("Server started");
     console.log(process.env.CLOUDINARY_CLOUD_NAME)
 });
