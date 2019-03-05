@@ -1,40 +1,61 @@
 const express = require("express");
-
-
+const uid2 = require("uid2");
 const router = express.Router();
-
-
 const Offer = require('../models/offer');
+const User = require('../models/user');
+var uploadPictures = require("../middlewares/uploadPictures");
 
 
-// //Create
+// Publish
 
-// router.post("/department/create", async (req, res) => {
-//     try {
-
-//         const newDepartment = new Department({
-//             title: req.body.title
-//         });
-//         await newDepartment.save();
-
-
-//         res.json({
-//             message: "new department created"
-//         });
-//     } catch (error) {
-//         res.status(400).json({
-//             error: error.message
-//         });
-//     }
-// });
-
-// Read
-
-router.get("/offer/with-count", async (req, res) => {
+router.post("/offer/publish", uploadPictures, async (req, res) => {
     try {
-        const offers = await Offer.find().skip(Number(req.query.skip)).limit(Number(req.query.limit));
 
-        res.json({ count: offers.length, offers });
+        const bearerToken = req.headers.authorization
+        console.log(bearerToken);
+        console.log(req.pictures);
+
+        if (bearerToken) {
+
+            const token = bearerToken.slice(7);
+
+            const user = await User.findOne({ token: token });
+
+            const newOffer = new Offer({
+                _id: uid2(26),
+                title: req.body.title,
+                description: req.body.description,
+                price: req.body.price,
+                creator: user,
+                created: new Date(),
+                pictures: req.pictures
+
+            });
+            await newOffer.save();
+
+            res.json({
+                _id: newOffer._id,
+                title: newOffer.title,
+                description: newOffer.description,
+                price: newOffer.price,
+                created: newOffer.created,
+                creator: {
+                    account: {
+                        username: user.account.username
+
+                    },
+                    _id: user._id
+                },
+                pictures: newOffer.pictures
+            });
+        } else {
+            res.status(400).json({
+                message: "Unauthorized"
+            });
+        }
+
+
+
     } catch (error) {
         res.status(400).json({
             error: error.message
@@ -42,65 +63,40 @@ router.get("/offer/with-count", async (req, res) => {
     }
 });
 
-// //Update
+// Read
 
-// router.post("/department/update", async (req, res) => {
-//     try {
-//         const department = await Department.findById(req.query.department);
-//         console.log(department);
-//         if (department !== null) {
-//             department.title = req.body.title;
-//             await department.save();
-//             res.json({
-//                 message: "Department updated"
-//             });
-//         } else {
-//             res.status(400).json({
-//                 message: "Bad request"
-//             });
-//         }
-//     } catch (error) {
-//         res.status(400).json({
-//             error: error.message
-//         });
-//     }
-// });
+router.get("/offer/with-count", async (req, res) => {
+    try {
 
-// //Delete
+        const allOffers = await Offer.find()
 
-// router.post("/department/delete", async (req, res) => {
-//     try {
-//         //trouver les catégories
-//         const deletedCats = await Category.find({
-//             department: req.body.department
-//         });
+        const offers = await Offer.find().skip(Number(req.query.skip)).limit(Number(req.query.limit));
 
-//         //supprimer tous les produits dans les catégories
-//         for (let i = 0; i < deletedCats.length; i++) {
-//             await Product.deleteMany({
-//                 category: deletedCats[i].id
-//             });
-//         }
+        res.json({ count: allOffers.length, offers });
+    } catch (error) {
+        res.status(400).json({
+            error: error.message
+        });
+    }
+});
 
-//         //supprimer les catégories
-//         await Category.deleteMany({
-//             department: req.body.department
-//         });
 
-//         //supprimer le département
-//         const deptToDelete = await Department.findById(req.body.department);
 
-//         await deptToDelete.remove();
+// read by id
 
-//         res.json({
-//             message: "Department and referenced categories and products removed"
-//         });
-//     } catch (error) {
-//         res.status(400).json({
-//             error: error.message
-//         });
-//     }
-// });
+router.get("/offer/:id", async (req, res) => {
+    try {
+        const offer = await Offer.findById(req.params.id).populate("creator", "account");
+
+
+        res.json(offer);
+    } catch (error) {
+        res.status(400).json({
+            error: error.message
+        });
+    }
+});
+
 
 
 module.exports = router;

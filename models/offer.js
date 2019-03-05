@@ -6,13 +6,13 @@ const Offer = mongoose.model("Offer", {
     description: String,
     price: Number,
     creator: {
-        account: {
-            username: String,
-            phone: String
-        },
-        _id: String
+
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+
     },
-    created: Date
+    created: Date,
+    pictures: Array
 });
 
 module.exports = Offer;

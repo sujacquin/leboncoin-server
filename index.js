@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -8,7 +10,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 mongoose.connect(
-    "mongodb://localhost/leboncoin",
+    process.env.MONGODB_URI,
     { useNewUrlParser: true }
 );
 
@@ -25,7 +27,8 @@ app.use(userRoutes);
 
 
 
-app.listen(3001, () => {
+app.listen(process.env.PORT || 3000, () => {
     console.log("Server started");
+    console.log(process.env.CLOUDINARY_CLOUD_NAME)
 });
 
