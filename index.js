@@ -29,6 +29,6 @@ app.use(userRoutes);
 
 app.listen(process.env.PORT || 3001, () => {
     console.log("Server started");
-    console.log(process.env.CLOUDINARY_CLOUD_NAME)
+
 });
 
